@@ -34,7 +34,8 @@ page-to-voice/
 - **Database:** [MySQL](https://www.mysql.com/) with [PyMySQL](https://pymysql.readthedocs.io/)
 - **ORM:** [SQLAlchemy 2.0](https://www.sqlalchemy.org/)
 - **Data Validation:** [Pydantic v2](https://docs.pydantic.dev/)
-- **Authentication:** JWT ([PyJWT](https://pyjwt.readthedocs.io/)) with password hashing via [Passlib (bcrypt)](https://passlib.readthedocs.io/)
+- **Authentication:** JWT ([PyJWT](https://pyjwt.readthedocs.io/)) with password hashing via [Passlib (bcrypt)](https://passlib.readthedocs.io/) (12 rounds)
+- **Security Features:** Brute-force rate limiting, constant-time verification against timing attacks, OWASP security headers, dual identifier login (username or email), and password complexity policies.
 - **Configuration:** [python-dotenv](https://github.com/theskumar/python-dotenv)
 
 ---
@@ -105,7 +106,8 @@ python seed.py
 ```
 
 - **Default Admin Email:** `admin@pagetovoice.com`
-- **Default Admin Password:** `admin123`
+- **Default Admin Username:** `admin`
+- **Default Admin Password:** `1234@1234`
 
 ### 6. Start the API Server
 
