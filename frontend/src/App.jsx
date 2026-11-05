@@ -1,122 +1,123 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { useState } from 'react';
+import AuthProvider from './context/AuthProvider';
+import useAuth from './context/useAuth';
+import Navbar from './components/layout/Navbar';
+import LoginScreen from './components/screens/LoginScreen';
+import RegisterScreen from './components/screens/RegisterScreen';
+import AccountScreen from './components/screens/AccountScreen';
+import Alert from './components/common/Alert/Alert';
+import { getBaseUrl } from './api/apiClient';
+import './App.css';
 
-function App() {
-  const [count, setCount] = useState(0)
+const CURRENT_YEAR = new Date().getFullYear();
+
+function AppContent() {
+  const {
+    user,
+    isLoading,
+    authError,
+    successMessage,
+    login,
+    register,
+    logout,
+    clearError,
+    clearSuccess,
+  } = useAuth();
+
+  const [activeScreen, setActiveScreen] = useState('login');
+  const baseUrl = getBaseUrl();
+
+  const handleNavigate = (screen) => {
+    clearError();
+    clearSuccess();
+    setActiveScreen(screen);
+  };
+
+  const handleLoginSubmit = async (credentials) => {
+    await login(credentials);
+    setActiveScreen('account');
+  };
+
+  const handleRegisterSubmit = async (userData) => {
+    await register(userData);
+    setActiveScreen('account');
+  };
+
+  const handleLogoutSubmit = async () => {
+    await logout();
+    setActiveScreen('login');
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
+    <div className="app-wrapper">
+      <Navbar
+        activeScreen={activeScreen}
+        onNavigate={handleNavigate}
+        user={user}
+      />
+
+      <main className="main-content">
+        {successMessage && (
+          <div className="notification-container">
+            <Alert
+              type="success"
+              title="Success"
+              onClose={clearSuccess}
+            >
+              {successMessage}
+            </Alert>
+          </div>
+        )}
+
+        {activeScreen === 'login' && (
+          <LoginScreen
+            onLogin={handleLoginSubmit}
+            onNavigateToRegister={() => handleNavigate('register')}
+            isLoading={isLoading}
+            authError={authError}
+            onClearError={clearError}
+          />
+        )}
+
+        {activeScreen === 'register' && (
+          <RegisterScreen
+            onRegister={handleRegisterSubmit}
+            onNavigateToLogin={() => handleNavigate('login')}
+            isLoading={isLoading}
+            authError={authError}
+            onClearError={clearError}
+          />
+        )}
+
+        {activeScreen === 'account' && (
+          <AccountScreen
+            user={user}
+            onLogout={handleLogoutSubmit}
+            onNavigateToLogin={() => handleNavigate('login')}
+            onNavigateToRegister={() => handleNavigate('register')}
+            isLoading={isLoading}
+          />
+        )}
+      </main>
+
+      <footer className="app-footer">
         <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
+          <span>&copy; {CURRENT_YEAR} Page to Voice. All rights reserved.</span>
         </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+        <div className="footer-contract-pill">
+          API Endpoint Status: {baseUrl ? `Configured (${baseUrl})` : 'Contracts Pending Backend Confirmation'}
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      </footer>
+    </div>
+  );
 }
 
-export default App
+export function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
+  );
+}
+
+export default App;
