@@ -101,18 +101,18 @@ export function LoginScreen({
           </Alert>
         )}
 
-        <form onSubmit={handleSubmit} noValidate>
+        <form onSubmit={handleSubmit} noValidate autoComplete="off">
           <TextInput
             id="identifier"
             type="text"
             label="Email or Username"
-            placeholder="admin@pagetovoice.com or admin"
+            placeholder="Enter your email or username"
             value={formData.identifier}
             onChange={handleChange}
             error={fieldErrors.identifier}
             required
             disabled={isLoading}
-            autoComplete="username"
+            autoComplete="off"
           />
 
           <PasswordInput
