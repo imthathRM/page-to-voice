@@ -1,6 +1,6 @@
 import re
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel, EmailStr, Field, ConfigDict, field_validator, model_validator
 
 
@@ -68,3 +68,149 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     email: Optional[str] = None
     role: Optional[str] = None
+
+
+# Document & Chapter Schemas
+class ChapterResponse(BaseModel):
+    id: int
+    document_id: int
+    chapter_number: int
+    title: Optional[str] = None
+    original_text: Optional[str] = None
+    processed_text: Optional[str] = None
+    audio_file_url: Optional[str] = None
+    duration_seconds: Optional[float] = 0.0
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class DocumentResponse(BaseModel):
+    id: int
+    user_id: int
+    title: str
+    file_type: str
+    source_file_url: str
+    mode: str
+    source_language: str
+    target_language: Optional[str] = None
+    status: Optional[str] = "uploaded"
+    created_at: datetime
+    chapter_count: Optional[int] = 0
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class DocumentDetailResponse(DocumentResponse):
+    chapters: List[ChapterResponse] = []
+    error_message: Optional[str] = None
+
+
+class DocumentProcessResponse(BaseModel):
+    document_id: int
+    status: str
+    message: str
+    detected_language: str
+    chapter_count: int
+
+
+# AI Request/Response Schemas
+class CleanTextRequest(BaseModel):
+    text: str
+    language: Optional[str] = "en"
+    chapter_id: Optional[int] = None
+
+
+class CleanTextResponse(BaseModel):
+    cleaned_text: str
+    chapter_id: Optional[int] = None
+
+
+class SummarizeRequest(BaseModel):
+    text: str
+    language: Optional[str] = "en"
+    chapter_id: Optional[int] = None
+
+
+class SummarizeResponse(BaseModel):
+    summary: str
+    chapter_id: Optional[int] = None
+
+
+class TranslateRequest(BaseModel):
+    text: str
+    source_language: Optional[str] = "en"
+    target_language: str = Field(..., description="Target language: en, ta, or si")
+    chapter_id: Optional[int] = None
+
+
+class TranslateResponse(BaseModel):
+    translated_text: str
+    source_language: str
+    target_language: str
+    chapter_id: Optional[int] = None
+
+
+class TTSGenerateRequest(BaseModel):
+    chapter_id: int
+    text: Optional[str] = None
+    language: Optional[str] = "en"
+    voice_name: Optional[str] = None
+
+
+class TTSGenerateResponse(BaseModel):
+    chapter_id: int
+    audio_url: str
+    duration_seconds: float
+    format: str
+    language: str
+    provider: str
+
+
+# Batch Audiobook Generation Schemas
+class AudiobookChapterProgress(BaseModel):
+    chapter_id: int
+    chapter_number: int
+    title: Optional[str] = None
+    status: str  # pending, processing, completed, failed
+    audio_url: Optional[str] = None
+    duration_seconds: Optional[float] = 0.0
+    error: Optional[str] = None
+
+
+class AudiobookProgressResponse(BaseModel):
+    document_id: int
+    total_chapters: int
+    completed_chapters: int
+    overall_progress_percent: int
+    status: str  # pending, processing, completed, failed
+    provider: str
+    chapters: List[AudiobookChapterProgress] = []
+
+
+class GenerateAudiobookRequest(BaseModel):
+    voice_name: Optional[str] = None
+    language: Optional[str] = None
+    force_regenerate: Optional[bool] = False
+
+
+class GenerateAudiobookResponse(BaseModel):
+    job_id: int
+    document_id: int
+    status: str
+    message: str
+    provider: str
+
+
+class VoiceItem(BaseModel):
+    name: str
+    gender: str
+    label: str
+    locale: Optional[str] = None
+
+
+class AvailableVoicesResponse(BaseModel):
+    provider: str
+    language: str
+    voices: List[VoiceItem]
+

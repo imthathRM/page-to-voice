@@ -4,7 +4,7 @@ import './Navbar.css';
  * Page to Voice - Navigation Header Component
  *
  * @param {Object} props
- * @param {'login'|'register'|'account'} props.activeScreen
+ * @param {string} props.activeScreen
  * @param {Function} props.onNavigate
  * @param {Object|null} props.user
  */
@@ -13,12 +13,12 @@ export function Navbar({ activeScreen, onNavigate, user }) {
     <header className="navbar">
       <div
         className="nav-brand"
-        onClick={() => onNavigate(user ? 'account' : 'login')}
+        onClick={() => onNavigate(user ? 'dashboard' : 'login')}
         role="button"
         tabIndex={0}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
-            onNavigate(user ? 'account' : 'login');
+            onNavigate(user ? 'dashboard' : 'login');
           }
         }}
         aria-label="Page to Voice Home"
@@ -33,11 +33,10 @@ export function Navbar({ activeScreen, onNavigate, user }) {
           strokeLinejoin="round"
           aria-hidden="true"
         >
-          {/* Audio wave / document voice icon */}
           <path d="M12 2v20M17 5v14M7 8v8M22 10v4M2 10v4" />
         </svg>
         <span>Page to Voice</span>
-        <span className="brand-badge">Auth</span>
+        <span className="brand-badge">Sprint 1</span>
       </div>
 
       <nav aria-label="Main Navigation">
@@ -70,6 +69,26 @@ export function Navbar({ activeScreen, onNavigate, user }) {
               <li>
                 <button
                   type="button"
+                  className={`nav-link ${activeScreen === 'dashboard' ? 'active' : ''}`}
+                  onClick={() => onNavigate('dashboard')}
+                  aria-current={activeScreen === 'dashboard' ? 'page' : undefined}
+                >
+                  Dashboard
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  className={`nav-link ${activeScreen === 'upload' ? 'active' : ''}`}
+                  onClick={() => onNavigate('upload')}
+                  aria-current={activeScreen === 'upload' ? 'page' : undefined}
+                >
+                  Upload
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
                   className={`nav-link ${activeScreen === 'account' ? 'active' : ''}`}
                   onClick={() => onNavigate('account')}
                   aria-current={activeScreen === 'account' ? 'page' : undefined}
@@ -78,9 +97,9 @@ export function Navbar({ activeScreen, onNavigate, user }) {
                 </button>
               </li>
               <li>
-                <div className="nav-user-pill">
+                <div className="nav-user-pill" onClick={() => onNavigate('account')} style={{ cursor: 'pointer' }}>
                   <span className="user-status-dot" aria-hidden="true" />
-                  <span>{user.name || user.email}</span>
+                  <span>{user.name || user.username || user.email}</span>
                 </div>
               </li>
             </>
