@@ -8,6 +8,9 @@ import './Screens.css';
 /**
  * Page to Voice - Registration Screen Component
  *
+ * Integrated with FastAPI /auth/register endpoint:
+ * requires username, email, and strong password.
+ *
  * @param {Object} props
  * @param {Function} props.onRegister - Async handler to submit registration
  * @param {Function} props.onNavigateToLogin - Navigation callback
@@ -23,7 +26,7 @@ export function RegisterScreen({
   onClearError,
 }) {
   const [formData, setFormData] = useState({
-    name: '',
+    username: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -33,13 +36,16 @@ export function RegisterScreen({
 
   const validate = () => {
     const errors = {};
-    const nameTrimmed = formData.name.trim();
+    const usernameTrimmed = formData.username.trim();
     const emailTrimmed = formData.email.trim();
+    const pwd = formData.password;
 
-    if (!nameTrimmed) {
-      errors.name = 'Full name is required.';
-    } else if (nameTrimmed.length < 2) {
-      errors.name = 'Name must be at least 2 characters.';
+    if (!usernameTrimmed) {
+      errors.username = 'Username is required.';
+    } else if (usernameTrimmed.length < 3 || usernameTrimmed.length > 50) {
+      errors.username = 'Username must be between 3 and 50 characters.';
+    } else if (!/^[a-zA-Z0-9_-]+$/.test(usernameTrimmed)) {
+      errors.username = 'Username can only contain letters, numbers, underscores, and hyphens.';
     }
 
     if (!emailTrimmed) {
@@ -48,15 +54,23 @@ export function RegisterScreen({
       errors.email = 'Please enter a valid email address.';
     }
 
-    if (!formData.password) {
+    if (!pwd) {
       errors.password = 'Password is required.';
-    } else if (formData.password.length < 8) {
-      errors.password = 'Password must be at least 8 characters.';
+    } else if (pwd.length < 8) {
+      errors.password = 'Password must be at least 8 characters long.';
+    } else if (!/\d/.test(pwd)) {
+      errors.password = 'Password must contain at least one digit.';
+    } else if (!/[a-zA-Z]/.test(pwd)) {
+      errors.password = 'Password must contain at least one letter.';
+    } else if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(pwd)) {
+      errors.password = 'Password must contain at least one special character (!@#$%^&*).';
+    } else if (/\s/.test(pwd)) {
+      errors.password = 'Password must not contain spaces.';
     }
 
     if (!formData.confirmPassword) {
       errors.confirmPassword = 'Confirming your password is required.';
-    } else if (formData.password !== formData.confirmPassword) {
+    } else if (pwd !== formData.confirmPassword) {
       errors.confirmPassword = 'Passwords do not match.';
     }
 
@@ -82,7 +96,7 @@ export function RegisterScreen({
 
     try {
       await onRegister({
-        name: formData.name.trim(),
+        username: formData.username.trim(),
         email: formData.email.trim(),
         password: formData.password,
       });
@@ -113,15 +127,16 @@ export function RegisterScreen({
 
         <form onSubmit={handleSubmit} noValidate>
           <TextInput
-            id="name"
-            label="Full Name"
-            placeholder="e.g. Jane Doe"
-            value={formData.name}
+            id="username"
+            label="Username"
+            placeholder="e.g. alex_reader"
+            value={formData.username}
             onChange={handleChange}
-            error={fieldErrors.name}
+            error={fieldErrors.username}
+            helperText="3-50 characters (alphanumeric, underscores, hyphens)"
             required
             disabled={isLoading}
-            autoComplete="name"
+            autoComplete="username"
           />
 
           <TextInput
@@ -144,7 +159,7 @@ export function RegisterScreen({
             value={formData.password}
             onChange={handleChange}
             error={fieldErrors.password}
-            helperText="Must be at least 8 characters long."
+            helperText="At least 8 characters with letters, numbers, and special characters (!@#$%^&*)."
             required
             disabled={isLoading}
             autoComplete="new-password"

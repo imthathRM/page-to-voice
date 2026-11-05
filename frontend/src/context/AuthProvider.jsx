@@ -1,12 +1,37 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AuthContext } from './AuthContext';
 import authService from '../api/authService';
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
   const [authError, setAuthError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
+
+  // Restore authenticated session on initial load
+  useEffect(() => {
+    let isMounted = true;
+    const restoreSession = async () => {
+      try {
+        const profile = await authService.getProfile();
+        if (isMounted && profile) {
+          setUser(profile);
+        }
+      } catch {
+        // Session restoration failed silently (e.g. expired token)
+      } finally {
+        if (isMounted) {
+          setIsInitializing(false);
+        }
+      }
+    };
+
+    restoreSession();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const clearError = () => {
     setAuthError(null);
@@ -64,7 +89,8 @@ export function AuthProvider({ children }) {
 
   const value = {
     user,
-    isLoading,
+    isLoading: isLoading || isInitializing,
+    isInitializing,
     authError,
     successMessage,
     login,

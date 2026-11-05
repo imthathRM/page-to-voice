@@ -8,6 +8,8 @@ import './Screens.css';
 /**
  * Page to Voice - Login Screen Component
  *
+ * Supports login by either Email or Username, integrated with FastAPI /auth/login.
+ *
  * @param {Object} props
  * @param {Function} props.onLogin - Async handler to submit login
  * @param {Function} props.onNavigateToRegister - Navigation callback
@@ -23,7 +25,7 @@ export function LoginScreen({
   onClearError,
 }) {
   const [formData, setFormData] = useState({
-    email: '',
+    identifier: '',
     password: '',
   });
 
@@ -31,18 +33,22 @@ export function LoginScreen({
 
   const validate = () => {
     const errors = {};
-    const emailTrimmed = formData.email.trim();
+    const trimmed = formData.identifier.trim();
 
-    if (!emailTrimmed) {
-      errors.email = 'Email address is required.';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTrimmed)) {
-      errors.email = 'Please enter a valid email address.';
+    if (!trimmed) {
+      errors.identifier = 'Email or username is required.';
+    } else if (trimmed.includes('@')) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+        errors.identifier = 'Please enter a valid email address.';
+      }
+    } else if (trimmed.length < 3) {
+      errors.identifier = 'Username must be at least 3 characters.';
     }
 
     if (!formData.password) {
       errors.password = 'Password is required.';
-    } else if (formData.password.length < 6) {
-      errors.password = 'Password must be at least 6 characters.';
+    } else if (formData.password.length < 4) {
+      errors.password = 'Password must be at least 4 characters.';
     }
 
     setFieldErrors(errors);
@@ -67,7 +73,7 @@ export function LoginScreen({
 
     try {
       await onLogin({
-        email: formData.email.trim(),
+        email: formData.identifier.trim(),
         password: formData.password,
       });
     } catch {
@@ -97,16 +103,16 @@ export function LoginScreen({
 
         <form onSubmit={handleSubmit} noValidate>
           <TextInput
-            id="email"
-            type="email"
-            label="Email Address"
-            placeholder="name@example.com"
-            value={formData.email}
+            id="identifier"
+            type="text"
+            label="Email or Username"
+            placeholder="admin@pagetovoice.com or admin"
+            value={formData.identifier}
             onChange={handleChange}
-            error={fieldErrors.email}
+            error={fieldErrors.identifier}
             required
             disabled={isLoading}
-            autoComplete="email"
+            autoComplete="username"
           />
 
           <PasswordInput

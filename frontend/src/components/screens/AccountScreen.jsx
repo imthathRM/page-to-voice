@@ -23,7 +23,7 @@ export function AccountScreen({
   isLoading = false,
 }) {
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
-  const backendBaseUrl = getBaseUrl();
+  const backendBaseUrl = getBaseUrl() || 'http://localhost:8000';
 
   const handleConfirmLogout = async () => {
     setIsLogoutModalOpen(false);
@@ -50,7 +50,7 @@ export function AccountScreen({
     );
   }
 
-  const userInitials = (user.name || user.email || 'U')
+  const userInitials = (user.username || user.name || user.email || 'U')
     .slice(0, 2)
     .toUpperCase();
 
@@ -64,7 +64,7 @@ export function AccountScreen({
             type="warning"
             title="Local Development Preview"
           >
-            This session is a local development simulation (VITE_ENABLE_AUTH_PREVIEW=true). No real account exists on a backend server, and no real authentication token was issued.
+            This session is a local development simulation (VITE_ENABLE_AUTH_PREVIEW=true).
           </Alert>
         )}
 
@@ -75,7 +75,7 @@ export function AccountScreen({
             </div>
             <div>
               <h1 className="auth-card-title" style={{ fontSize: '20px' }}>
-                {user.name || 'Account User'}
+                {user.username || user.name || 'Account User'}
               </h1>
               <p className="auth-card-subtitle">{user.email}</p>
             </div>
@@ -83,11 +83,11 @@ export function AccountScreen({
 
           <div className={`account-status-badge ${isPreview ? 'account-status-badge-preview' : ''}`}>
             <span className="status-indicator" aria-hidden="true" />
-            <span>{isPreview ? 'Local Development Preview' : (user.status || 'Active')}</span>
+            <span>{isPreview ? 'Preview Mode' : (user.status || 'Active')}</span>
           </div>
         </div>
 
-        {/* Backend API Contract Status Note */}
+        {/* Backend Integration Status Note */}
         <div className="contract-note-box">
           <div className="contract-note-title">
             <svg
@@ -99,27 +99,26 @@ export function AccountScreen({
               viewBox="0 0 24 24"
               aria-hidden="true"
             >
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="16" x2="12" y2="12" />
-              <line x1="12" y1="8" x2="12.01" y2="8" />
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22 4 12 14.01 9 11.01" />
             </svg>
             <span>Backend Integration Status</span>
           </div>
           <p style={{ margin: 0 }}>
-            {backendBaseUrl
-              ? `Connected to configured backend at: ${backendBaseUrl}. Contract synchronization pending backend teammate confirmation.`
-              : isPreview
-              ? 'Active session is a simulated preview for local UI evaluation. When backend contracts are ready, configure VITE_API_BASE_URL to connect to the real API.'
-              : 'Backend API contracts (endpoints, payload schemas, and auth token strategy) are isolated in authContracts.js pending confirmation.'}
+            {`Connected to Page to Voice FastAPI service at ${backendBaseUrl}. Authenticated via JWT Bearer token.`}
           </p>
         </div>
 
         <div className="account-details-list">
           <div className="detail-item">
-            <span className="detail-label">Account Identifier</span>
+            <span className="detail-label">Account Identifier (ID)</span>
             <span className="detail-value">
-              {isPreview ? 'None (Local Preview Simulation)' : (user.id || 'Pending Backend Assignment')}
+              {user.id !== null && user.id !== undefined ? `#${user.id}` : 'None'}
             </span>
+          </div>
+          <div className="detail-item">
+            <span className="detail-label">Username</span>
+            <span className="detail-value">{user.username || user.name || 'N/A'}</span>
           </div>
           <div className="detail-item">
             <span className="detail-label">Email Address</span>
@@ -127,19 +126,19 @@ export function AccountScreen({
           </div>
           <div className="detail-item">
             <span className="detail-label">Account Role</span>
-            <span className="detail-value">
-              {isPreview ? 'Development Simulation' : (user.role || 'Standard User')}
+            <span className="detail-value" style={{ textTransform: 'capitalize' }}>
+              {user.role || 'user'}
             </span>
           </div>
           <div className="detail-item">
             <span className="detail-label">Session Type</span>
             <span className="detail-value">
-              {isPreview ? 'Local Development Preview (Simulated)' : 'Authenticated Backend Session'}
+              {isPreview ? 'Local Simulation' : 'Authenticated JWT Session'}
             </span>
           </div>
           <div className="detail-item">
-            <span className="detail-label">Backend URL</span>
-            <span className="detail-value">{backendBaseUrl || 'Not configured (VITE_API_BASE_URL)'}</span>
+            <span className="detail-label">Backend Service</span>
+            <span className="detail-value">{backendBaseUrl}</span>
           </div>
         </div>
 

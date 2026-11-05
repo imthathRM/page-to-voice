@@ -5,25 +5,40 @@
  * - Environment-based backend URL configuration (VITE_API_BASE_URL)
  * - Standard headers and authentication header injection
  * - Unified response parsing and consistent error formatting
- * - Safe isolation to connect with backend endpoints once confirmed
+ * - Token persistence across sessions using localStorage
  */
 
 // Retrieve base URL from environment or fallback to empty string (relative to host)
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '');
 
-// In-memory token storage (can be swapped or connected to cookies/storage once backend strategy is confirmed)
-let authToken = null;
+const TOKEN_STORAGE_KEY = 'page_to_voice_token';
+
+// In-memory token initialized from localStorage if available
+let authToken = typeof window !== 'undefined' ? localStorage.getItem(TOKEN_STORAGE_KEY) : null;
 
 export const setAuthToken = (token) => {
   authToken = token;
+  if (typeof window !== 'undefined') {
+    if (token) {
+      localStorage.setItem(TOKEN_STORAGE_KEY, token);
+    } else {
+      localStorage.removeItem(TOKEN_STORAGE_KEY);
+    }
+  }
 };
 
 export const getAuthToken = () => {
+  if (!authToken && typeof window !== 'undefined') {
+    authToken = localStorage.getItem(TOKEN_STORAGE_KEY);
+  }
   return authToken;
 };
 
 export const clearAuthToken = () => {
   authToken = null;
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem(TOKEN_STORAGE_KEY);
+  }
 };
 
 export const getBaseUrl = () => {
@@ -54,10 +69,11 @@ export async function request(endpoint, options = {}) {
     ? endpoint
     : `${API_BASE_URL}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
 
+  const currentToken = getAuthToken();
   const headers = {
     'Content-Type': 'application/json',
     Accept: 'application/json',
-    ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+    ...(currentToken ? { Authorization: `Bearer ${currentToken}` } : {}),
     ...(options.headers || {}),
   };
 
@@ -87,10 +103,21 @@ export async function request(endpoint, options = {}) {
     }
 
     if (!response.ok) {
-      // Extract error message from backend payload if available, without assuming a fixed schema
+      // Extract error message from backend payload if available
       let errorMessage = `Request failed with status ${response.status}`;
       if (responseData && typeof responseData === 'object') {
-        errorMessage = responseData.message || responseData.error || responseData.detail || errorMessage;
+        if (Array.isArray(responseData.detail)) {
+          // Format FastAPI validation errors
+          errorMessage = responseData.detail
+            .map((item) => (typeof item === 'object' ? item.msg || JSON.stringify(item) : String(item)))
+            .join('. ');
+        } else if (typeof responseData.detail === 'string') {
+          errorMessage = responseData.detail;
+        } else if (responseData.message) {
+          errorMessage = responseData.message;
+        } else if (responseData.error) {
+          errorMessage = responseData.error;
+        }
       } else if (typeof responseData === 'string' && responseData.trim().length > 0) {
         errorMessage = responseData;
       }
@@ -104,9 +131,9 @@ export async function request(endpoint, options = {}) {
       throw error;
     }
     // Network or client-side fetch error (e.g., server offline, CORS, DNS)
-    const isNetworkError = error.name === 'TypeError' || error.message.includes('fetch');
+    const isNetworkError = error.name === 'TypeError' || error.message?.includes('fetch');
     const message = isNetworkError
-      ? 'Unable to connect to the backend server. Please verify the server is running and VITE_API_BASE_URL is configured.'
+      ? 'Unable to connect to the backend server. Please verify the server is running at http://localhost:8000.'
       : error.message || 'An unexpected error occurred during the request.';
 
     throw new ApiError(message, 0, null);

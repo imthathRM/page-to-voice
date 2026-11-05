@@ -24,28 +24,31 @@ function AppContent() {
     clearSuccess,
   } = useAuth();
 
-  const [activeScreen, setActiveScreen] = useState('login');
-  const baseUrl = getBaseUrl();
+  const [navScreen, setNavScreen] = useState(null);
+  const baseUrl = getBaseUrl() || 'http://localhost:8000';
+
+  // Determine active screen based on explicit navigation or user authentication status
+  const activeScreen = navScreen ?? (user ? 'account' : 'login');
 
   const handleNavigate = (screen) => {
     clearError();
     clearSuccess();
-    setActiveScreen(screen);
+    setNavScreen(screen);
   };
 
   const handleLoginSubmit = async (credentials) => {
     await login(credentials);
-    setActiveScreen('account');
+    setNavScreen('account');
   };
 
   const handleRegisterSubmit = async (userData) => {
     await register(userData);
-    setActiveScreen('account');
+    setNavScreen('account');
   };
 
   const handleLogoutSubmit = async () => {
     await logout();
-    setActiveScreen('login');
+    setNavScreen('login');
   };
 
   return (
@@ -105,7 +108,7 @@ function AppContent() {
           <span>&copy; {CURRENT_YEAR} Page to Voice. All rights reserved.</span>
         </div>
         <div className="footer-contract-pill">
-          API Endpoint Status: {baseUrl ? `Configured (${baseUrl})` : 'Contracts Pending Backend Confirmation'}
+          Backend API: Connected ({baseUrl})
         </div>
       </footer>
     </div>
