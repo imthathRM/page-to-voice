@@ -1,0 +1,15 @@
+Page to Voice Multi-Language Test Document
+
+Page to Voice is an intelligent audiobook generation and listening platform designed to convert written documents into accessible, high-quality audio.
+
+பக்கம் முதல் குரல் வரை: அறிவார்ந்த ஒலிப்புத்தகம் உருவாக்கும் தளம். இது எழுத்துப்பூர்வ ஆவணங்களை உயர்தர ஆடியோவாக மாற்றுகிறது.
+
+පිටුවෙන් හඬට: බුද්ධිමත් ශ්‍රව්‍ය පොත් නිර්මාණ වේදිකාව. මෙමඟින් ලියැවුණු ලේඛන උසස් තත්ත්වයේ හඬ බවට පරිවර්තනය කරයි.
+
+Advanced Linguistic and Technical Evaluation
+
+Special characters test: Quotes “Double” and ‘Single’. Symbols: ©, ®, ™, §, €, £, ¥, →, ★. Math: α + β = γ. Punctuation: — (em-dash), … (ellipsis), ¿¡.
+
+தமிழ் மொழி உலகின் மிகத் தொன்மையான செம்மொழிகளில் ஒன்றாகும். தொழில்நுட்ப சோதனையில் அனைத்து எழுத்துக்களும் சரியாகப் பாதுகாக்கப்பட வேண்டும்.
+
+සිංහල භාෂාව ඉන්දු-ආර්ය භාෂා පවුලට අයත් වන අතර දිවයිනේ ප්‍රධාන භාෂාවකි. තාක්ෂණික පරීක්ෂණයේදී සියලුම අක්ෂර නිවැරදිව කියවිය යුතුය.

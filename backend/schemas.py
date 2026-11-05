@@ -1,10 +1,13 @@
 import re
 from datetime import datetime
-from typing import Optional
+from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, EmailStr, Field, ConfigDict, field_validator, model_validator
 
 
+# ============================================================================
 # User Schemas
+# ============================================================================
+
 class UserBase(BaseModel):
     email: EmailStr
     username: str = Field(..., min_length=3, max_length=50)
@@ -58,7 +61,10 @@ class UserResponse(UserBase):
     model_config = ConfigDict(from_attributes=True)
 
 
+# ============================================================================
 # Token Schemas
+# ============================================================================
+
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
@@ -68,3 +74,69 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     email: Optional[str] = None
     role: Optional[str] = None
+
+
+# ============================================================================
+# Chapter & Document Schemas (Member 3 - Document Processing & Dashboard)
+# ============================================================================
+
+class ChapterResponse(BaseModel):
+    id: int
+    document_id: int
+    chapter_number: int
+    title: Optional[str] = None
+    original_text: Optional[str] = None
+    processed_text: Optional[str] = None
+    audio_file_url: Optional[str] = None
+    duration_seconds: Optional[float] = 0.0
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class DocumentListItem(BaseModel):
+    id: int
+    user_id: int
+    title: str
+    file_type: str
+    source_file_url: str
+    mode: str
+    source_language: str
+    target_language: Optional[str] = None
+    created_at: datetime
+    chapter_count: int = 0
+    status: str = "completed"
+    total_characters: int = 0
+    has_audio: bool = False
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class DocumentDetailResponse(BaseModel):
+    id: int
+    user_id: int
+    title: str
+    file_type: str
+    source_file_url: str
+    mode: str
+    source_language: str
+    target_language: Optional[str] = None
+    created_at: datetime
+    status: str = "completed"
+    error_message: Optional[str] = None
+    warnings: List[str] = Field(default_factory=list)
+    chapters: List[ChapterResponse] = Field(default_factory=list)
+    total_characters: int = 0
+    total_words: int = 0
+    raw_text: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class DashboardStatsResponse(BaseModel):
+    total_documents: int
+    processed_documents: int
+    processing_documents: int
+    audiobooks_generated: int
+    recent_documents: List[DocumentListItem] = Field(default_factory=list)
+    recent_activities: List[Dict[str, Any]] = Field(default_factory=list)

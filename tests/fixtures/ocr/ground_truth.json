@@ -1,0 +1,22 @@
+{
+  "english_sample.png": {
+    "language": "eng",
+    "text": "Page to Voice Intelligent Audiobook Platform\nAutomatic text extraction and speech synthesis"
+  },
+  "tamil_sample.png": {
+    "language": "tam",
+    "text": "பக்கம் முதல் குரல் வரை அறிவார்ந்த தளம்\nஎழுத்துக்களை இயற்கையான பேச்சாக மாற்றும் மென்பொருள்"
+  },
+  "sinhala_sample.png": {
+    "language": "sin",
+    "text": "පිටුවෙන් හඬට බුද්ධිමත් ශ්‍රව්‍ය වේදිකාව\nලිඛිත ලේඛන ස්වාභාවික හඬ බවට පරිවර්තනය කරයි"
+  },
+  "english_noisy.png": {
+    "language": "eng",
+    "text": "Page to Voice Intelligent Audiobook Platform\nAutomatic text extraction and speech synthesis"
+  },
+  "english_skewed.png": {
+    "language": "eng",
+    "text": "Page to Voice Intelligent Audiobook Platform\nAutomatic text extraction and speech synthesis"
+  }
+}

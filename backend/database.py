@@ -5,17 +5,22 @@ from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-# Locate and load the .env file
+# Locate and load the .env file if not running automated test suite
 env_path = Path(__file__).resolve().parent / ".env"
 if not env_path.exists():
     env_path = Path(__file__).resolve().parent.parent / ".env"
 
-load_dotenv(dotenv_path=env_path)
+if os.getenv("TESTING") != "1":
+    load_dotenv(dotenv_path=env_path)
 
 database_url = os.getenv("DATABASE_URL") or os.getenv("SERVICE_URI")
 connect_args = {}
 
-if database_url:
+# Check for automated testing mode or SQLite override
+if os.getenv("TESTING") == "1" or (database_url and database_url.startswith("sqlite")):
+    SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:" if os.getenv("TESTING") == "1" else database_url
+    connect_args = {"check_same_thread": False}
+elif database_url:
     parsed = urlparse(database_url)
     query = parse_qs(parsed.query)
 
@@ -27,6 +32,8 @@ if database_url:
     )
     if ssl_mode.upper() in ("REQUIRED", "VERIFY_CA", "VERIFY_IDENTITY", "TRUE", "1"):
         connect_args["ssl"] = {"ssl_mode": "REQUIRED"}
+
+    connect_args["connect_timeout"] = 3
 
     password = quote_plus(parsed.password) if parsed.password else ""
     port_part = f":{parsed.port}" if parsed.port else ""
@@ -45,20 +52,27 @@ else:
     if db_ssl_mode.upper() in ("REQUIRED", "VERIFY_CA", "VERIFY_IDENTITY", "TRUE", "1"):
         connect_args["ssl"] = {"ssl_mode": "REQUIRED"}
 
+    connect_args["connect_timeout"] = 3
+
     encoded_password = quote_plus(db_password)
     SQLALCHEMY_DATABASE_URL = (
         f"mysql+pymysql://{db_user}:{encoded_password}@{db_host}:{db_port}/{db_name}"
     )
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
-    connect_args=connect_args,
-    pool_pre_ping=True,
-    pool_recycle=3600,
-    pool_size=10,
-    max_overflow=20,
-    echo=False,
-)
+engine_kwargs = {
+    "connect_args": connect_args,
+    "pool_pre_ping": True,
+    "echo": False,
+}
+
+if not SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
+    engine_kwargs.update({
+        "pool_recycle": 3600,
+        "pool_size": 10,
+        "max_overflow": 20,
+    })
+
+engine = create_engine(SQLALCHEMY_DATABASE_URL, **engine_kwargs)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

@@ -22,12 +22,13 @@ import schemas
 
 logger = logging.getLogger("security")
 
-# Locate and load the .env file
+# Locate and load the .env file if not in automated testing mode
 env_path = Path(__file__).resolve().parent / ".env"
 if not env_path.exists():
     env_path = Path(__file__).resolve().parent.parent / ".env"
 
-load_dotenv(dotenv_path=env_path)
+if os.getenv("TESTING") != "1":
+    load_dotenv(dotenv_path=env_path)
 
 SECRET_KEY = os.getenv("SECRET_KEY", "super_secret_jwt_key_page_to_voice_2026")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")

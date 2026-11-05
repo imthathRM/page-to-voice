@@ -6,6 +6,7 @@
  * - Standard headers and authentication header injection
  * - Unified response parsing and consistent error formatting
  * - Token persistence across sessions using localStorage
+ * - Seamless support for JSON and multipart/form-data file uploads
  */
 
 // Retrieve base URL from environment or fallback to empty string (relative to host)
@@ -70,8 +71,10 @@ export async function request(endpoint, options = {}) {
     : `${API_BASE_URL}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
 
   const currentToken = getAuthToken();
+  const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
+
   const headers = {
-    'Content-Type': 'application/json',
+    ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
     Accept: 'application/json',
     ...(currentToken ? { Authorization: `Bearer ${currentToken}` } : {}),
     ...(options.headers || {}),
@@ -147,6 +150,12 @@ export const apiClient = {
       ...options,
       method: 'POST',
       body: data ? JSON.stringify(data) : undefined,
+    }),
+  upload: (endpoint, formData, options = {}) =>
+    request(endpoint, {
+      ...options,
+      method: 'POST',
+      body: formData,
     }),
   put: (endpoint, data, options = {}) =>
     request(endpoint, {
