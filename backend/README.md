@@ -16,7 +16,7 @@ Intelligent Audiobook Generation and Listening Platform API powered by FastAPI, 
    ```powershell
    python seed.py
    ```
-   This creates tables and the default admin (`admin@pagetovoice.com` / `admin123`).
+   This creates tables and the default admin (`admin@pagetovoice.com` / `1234@1234`).
 
 4. **Start Development Server:**
    ```powershell

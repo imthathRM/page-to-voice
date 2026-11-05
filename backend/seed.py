@@ -22,14 +22,21 @@ def seed_database():
         admin_email = "admin@pagetovoice.com"
         admin_user = db.query(models.User).filter(models.User.email == admin_email).first()
 
+        admin_password = "1234@1234"
         if admin_user:
-            print(f"Admin user already exists: {admin_email}")
+            print(f"Admin user already exists ({admin_email}). Updating credentials...")
+            admin_user.username = "admin"
+            admin_user.password_hash = get_password_hash(admin_password)
+            admin_user.role = models.UserRole.ADMIN
+            admin_user.is_active = True
+            db.commit()
+            print(f"Admin user credentials successfully updated (username: 'admin', password: '{admin_password}').")
         else:
             print(f"Creating default admin user: {admin_email}...")
             admin_user = models.User(
                 username="admin",
                 email=admin_email,
-                password_hash=get_password_hash("admin123"),
+                password_hash=get_password_hash(admin_password),
                 role=models.UserRole.ADMIN,
                 is_active=True,
             )
