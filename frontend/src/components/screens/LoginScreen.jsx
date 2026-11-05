@@ -102,8 +102,27 @@ export function LoginScreen({
         )}
 
         <form onSubmit={handleSubmit} noValidate autoComplete="off">
+          {/* Hidden inputs to absorb aggressive browser credential autofill */}
+          <input
+            type="text"
+            name="prevent_autofill_username"
+            tabIndex={-1}
+            aria-hidden="true"
+            style={{ position: 'absolute', opacity: 0, height: 0, width: 0, pointerEvents: 'none' }}
+            autoComplete="off"
+          />
+          <input
+            type="password"
+            name="prevent_autofill_password"
+            tabIndex={-1}
+            aria-hidden="true"
+            style={{ position: 'absolute', opacity: 0, height: 0, width: 0, pointerEvents: 'none' }}
+            autoComplete="off"
+          />
+
           <TextInput
             id="identifier"
+            name="login_account_identifier"
             type="text"
             label="Email or Username"
             placeholder="Enter your email or username"
@@ -117,6 +136,7 @@ export function LoginScreen({
 
           <PasswordInput
             id="password"
+            name="login_account_secret"
             label="Password"
             placeholder="Enter your password"
             value={formData.password}
@@ -124,7 +144,7 @@ export function LoginScreen({
             error={fieldErrors.password}
             required
             disabled={isLoading}
-            autoComplete="current-password"
+            autoComplete="new-password"
           />
 
           <Button
